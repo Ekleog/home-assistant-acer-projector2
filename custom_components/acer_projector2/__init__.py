@@ -1,6 +1,4 @@
-"""
-Custom integration to integrate Acer projectors with Home Assistant.
-"""
+"""Custom integration to integrate Acer projectors with Home Assistant."""
 
 from __future__ import annotations
 

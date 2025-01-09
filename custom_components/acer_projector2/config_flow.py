@@ -22,7 +22,9 @@ class BlueprintFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle a flow initialized by the user."""
         _errors = {}
         if user_input is not None:
-            return self.async_create_entry(title=user_input[CONF_FILENAME], data=user_input)
+            return self.async_create_entry(
+                title=user_input[CONF_FILENAME], data=user_input
+            )
 
         return self.async_show_form(
             step_id="user",

@@ -2,17 +2,15 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+import asyncio
 from datetime import timedelta
+from typing import TYPE_CHECKING, Any
 
+import serial_asyncio_fast as serial_asyncio
 from homeassistant.components.switch import SwitchEntity, SwitchEntityDescription
 from homeassistant.const import CONF_FILENAME
 
-import serial_asyncio_fast as serial_asyncio
-import asyncio
-
-from custom_components.acer_projector2.const import LOGGER
-
+from .const import LOGGER
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
@@ -28,6 +26,7 @@ ENTITY_DESCRIPTIONS = (
 
 SCAN_INTERVAL = timedelta(seconds=10)
 
+
 async def async_setup_entry(
     hass: HomeAssistant,  # noqa: ARG001 Unused function argument: `hass`
     entry: dict,
@@ -36,33 +35,34 @@ async def async_setup_entry(
     """Set up the switch platform."""
     async_add_entities(
         IntegrationAcerSwitch(
-            config = entry,
+            config=entry,
             entity_description=entity_description,
         )
         for entity_description in ENTITY_DESCRIPTIONS
     )
+
 
 class IntegrationAcerSwitch(SwitchEntity):
     """integration_blueprint switch class."""
 
     async def _execute(self, cmd: str) -> str:
         url = self.config.get(CONF_FILENAME, "")
-        for retry in range(3):
+        for _retry in range(3):
             reader, writer = await serial_asyncio.open_serial_connection(
-                url = url,
-                baudrate = 9600,
-                bytesize = serial_asyncio.serial.EIGHTBITS,
-                parity = serial_asyncio.serial.PARITY_NONE,
-                stopbits = serial_asyncio.serial.STOPBITS_ONE,
-                xonxoff = False,
-                rtscts = False,
-                dsrdtr = False,
+                url=url,
+                baudrate=9600,
+                bytesize=serial_asyncio.serial.EIGHTBITS,
+                parity=serial_asyncio.serial.PARITY_NONE,
+                stopbits=serial_asyncio.serial.STOPBITS_ONE,
+                xonxoff=False,
+                rtscts=False,
+                dsrdtr=False,
             )
             writer.write(cmd.encode("utf-8"))
             try:
-                resp = await asyncio.wait_for(reader.readuntil(b'\r'), timeout=5)
+                resp = await asyncio.wait_for(reader.readuntil(b"\r"), timeout=5)
                 return resp.decode("utf-8")
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 continue
         raise RuntimeError("Projector at " + url + " did not respond")
 
