@@ -13,6 +13,7 @@ from homeassistant.const import CONF_FILENAME
 from .const import LOGGER
 
 if TYPE_CHECKING:
+    from homeassistant.config_entries import ConfigEntry
     from homeassistant.core import HomeAssistant
     from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -29,7 +30,7 @@ SCAN_INTERVAL = timedelta(seconds=10)
 
 async def async_setup_entry(
     hass: HomeAssistant,  # noqa: ARG001 Unused function argument: `hass`
-    entry: dict,
+    entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the switch platform."""
@@ -46,7 +47,7 @@ class IntegrationAcerSwitch(SwitchEntity):
     """integration_blueprint switch class."""
 
     async def _execute(self, cmd: str) -> str:
-        url = self.config.get(CONF_FILENAME, "")
+        url = self.config.data.get(CONF_FILENAME, "")
         for _retry in range(3):
             reader, writer = await serial_asyncio.open_serial_connection(
                 url=url,
@@ -68,7 +69,7 @@ class IntegrationAcerSwitch(SwitchEntity):
 
     def __init__(
         self,
-        config: dict,
+        config: ConfigEntry,
         entity_description: SwitchEntityDescription,
     ) -> None:
         """Initialize the projector class."""
