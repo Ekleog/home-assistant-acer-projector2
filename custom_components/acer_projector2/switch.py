@@ -76,18 +76,19 @@ class IntegrationAcerSwitch(SwitchEntity):
         super().__init__()
         self.config = config
         self.entity_description = entity_description
-        self.attr_is_on = False
+        self._attr_is_on = False
+        self._attr_unique_id = config.data[CONF_FILENAME]
 
     @property
     def is_on(self) -> bool:
         """Return true if the projector is on."""
-        return self.attr_is_on
+        return self._attr_is_on
 
     async def async_update(self) -> None:
         """Update the state of the projector."""
         resp = await self._execute("* 0 Lamp ?\r")
         LOGGER.debug("Projector response: %s", repr(resp))
-        self.attr_is_on = resp[-2:] == "1\r"
+        self._attr_is_on = resp[-2:] == "1\r"
 
     async def async_turn_on(self, **_: Any) -> None:
         """Turn on the switch."""
