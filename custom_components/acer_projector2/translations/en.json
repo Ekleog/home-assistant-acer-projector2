@@ -1,0 +1,16 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "description": "If you need help with the configuration have a look here: https://github.com/Ekleog/home-assistant-acer-projector2",
+        "data": {
+          "filename": "Serial Console Path"
+        }
+      }
+    },
+    "error": {},
+    "abort": {
+      "already_configured": "This entry is already configured."
+    }
+  }
+}
