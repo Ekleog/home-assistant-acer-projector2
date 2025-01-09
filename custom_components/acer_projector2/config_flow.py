@@ -22,6 +22,8 @@ class AcerFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle a flow initialized by the user."""
         _errors = {}
         if user_input is not None:
+            await self.async_set_unique_id(user_input[CONF_FILENAME])
+            self._abort_if_unique_id_configured()
             return self.async_create_entry(
                 title=user_input[CONF_FILENAME], data=user_input
             )
