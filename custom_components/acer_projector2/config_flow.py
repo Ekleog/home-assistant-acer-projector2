@@ -10,8 +10,8 @@ from homeassistant.helpers import selector
 from .const import DOMAIN
 
 
-class BlueprintFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
-    """Config flow for Blueprint."""
+class AcerFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
+    """Config flow for Acer projectors."""
 
     VERSION = 1
 
