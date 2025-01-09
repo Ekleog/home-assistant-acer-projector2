@@ -48,23 +48,24 @@ class IntegrationAcerSwitch(SwitchEntity):
 
     async def _execute(self, cmd: str) -> str:
         url = self.config.data.get(CONF_FILENAME, "")
-        for _retry in range(3):
-            reader, writer = await serial_asyncio.open_serial_connection(
-                url=url,
-                baudrate=9600,
-                bytesize=serial_asyncio.serial.EIGHTBITS,
-                parity=serial_asyncio.serial.PARITY_NONE,
-                stopbits=serial_asyncio.serial.STOPBITS_ONE,
-                xonxoff=False,
-                rtscts=False,
-                dsrdtr=False,
-            )
-            writer.write(cmd.encode("utf-8"))
-            try:
-                resp = await asyncio.wait_for(reader.readuntil(b"\r"), timeout=5)
-                return resp.decode("utf-8")
-            except TimeoutError:
-                continue
+        async with self.lock:
+            for _retry in range(3):
+                reader, writer = await serial_asyncio.open_serial_connection(
+                    url=url,
+                    baudrate=9600,
+                    bytesize=serial_asyncio.serial.EIGHTBITS,
+                    parity=serial_asyncio.serial.PARITY_NONE,
+                    stopbits=serial_asyncio.serial.STOPBITS_ONE,
+                    xonxoff=False,
+                    rtscts=False,
+                    dsrdtr=False,
+                )
+                writer.write(cmd.encode("utf-8"))
+                try:
+                    resp = await asyncio.wait_for(reader.readuntil(b"\r"), timeout=5)
+                    return resp.decode("utf-8")
+                except TimeoutError:
+                    continue
         raise RuntimeError("Projector at " + url + " did not respond")
 
     def __init__(
@@ -76,6 +77,7 @@ class IntegrationAcerSwitch(SwitchEntity):
         super().__init__()
         self.config = config
         self.entity_description = entity_description
+        self.lock = asyncio.Lock()
         self._attr_is_on = False
         self._attr_unique_id = config.data[CONF_FILENAME]
 
