@@ -1,20 +1,46 @@
 #!/usr/bin/env bash
 
-set -e
+set -euo pipefail
+
+# Define default paths and allow overrides via environment variables
+CONFIG_DIR="${CONFIG_DIR:-${PWD}/config}"
+CUSTOM_COMPONENTS_DIR="${CUSTOM_COMPONENTS_DIR:-${PWD}/custom_components}"
+PYTHONPATH="${PYTHONPATH:-}${CUSTOM_COMPONENTS_DIR}:${PYTHONPATH}"
 
 cd "$(dirname "$0")/.."
 
-# Create config dir if not present
-if [[ ! -d "${PWD}/config" ]]; then
-    mkdir -p "${PWD}/config"
-    hass --config "${PWD}/config" --script ensure_config
+echo "Script execution started..."
+
+# Validate required dependencies
+echo "Validating dependencies..."
+if ! command -v hass &>/dev/null; then
+    echo "Error: Home Assistant CLI (hass) is not installed. Install it and try again." >&2
+    exit 1
 fi
 
-# Set the path to custom_components
-## This let's us have the structure we want <root>/custom_components/integration_blueprint
-## while at the same time have Home Assistant configuration inside <root>/config
-## without resulting to symlinks.
-export PYTHONPATH="${PYTHONPATH}:${PWD}/custom_components"
+# Create config directory if not present
+if [[ ! -d "$CONFIG_DIR" ]]; then
+    echo "Creating configuration directory..."
+    mkdir -p "$CONFIG_DIR"
+    hass --config "$CONFIG_DIR" --script ensure_config
+    echo "Configuration directory created at $CONFIG_DIR."
+else
+    echo "Configuration directory exists at $CONFIG_DIR."
+fi
 
-# Start Home Assistant
-hass --config "${PWD}/config" --debug
+# Set custom components path
+echo "Setting PYTHONPATH to include custom components..."
+export PYTHONPATH
+
+# Optional health check
+echo "Performing health checks..."
+if ! [ -d "$CUSTOM_COMPONENTS_DIR" ]; then
+    echo "Warning: Custom components directory not found at $CUSTOM_COMPONENTS_DIR." >&2
+fi
+
+# Start Home Assistant with debugging enabled
+echo "Starting Home Assistant with debugging enabled..."
+hass --config "$CONFIG_DIR" --debug
+
+echo "Script execution completed."
+
