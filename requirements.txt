@@ -1,4 +1,4 @@
 homeassistant==2025.1.1
 pip>=21.3.1
-ruff==0.8.6
+ruff==0.9.1
 pyserial-asyncio-fast==0.14
